@@ -2,7 +2,7 @@
 
 ## Getting started
 
-`$ npm install react-native-text-detector --save`
+`$ npm install react-native-text-detector --save` or `yarn add react-native-text-detector`
 
 ### Mostly automatic installation
 
@@ -37,8 +37,32 @@
 ## Usage
 
 ```javascript
+/**
+ *
+ * This Example uses react-native-camera for getting image
+ *
+ */
+
 import RNTextDetector from "react-native-text-detector";
 
-// TODO: What to do with the module?
-RNTextDetector;
+export class TextDetectionComponent extends PureComponent {
+  ...
+
+  detectText = async () => {
+    try {
+      const options = {
+        quality: 0.8,
+        base64: true,
+        skipProcessing: true,
+      };
+      const { uri } = await this.camera.takePictureAsync(options);
+      const visionResp = await RNTextDetector.detectFromUri(uri);
+      console.log('visionResp', visionResp);
+    } catch (e) {
+      console.warn(e);
+    }
+  };
+
+  ...
+}
 ```

@@ -33,7 +33,7 @@ public class RNTextDetectorModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-    public void textRecognize(String uri, final Promise promise) {
+    public void detectFromUri(String uri, final Promise promise) {
         try {
             image = FirebaseVisionImage.fromFilePath(this.reactContext, android.net.Uri.parse(uri));
             Task<FirebaseVisionText> result =
