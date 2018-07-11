@@ -1,0 +1,17 @@
+{
+  "name": "react-native-text-detector",
+  "version": "0.0.1",
+  "description": "Text Detector from image for react native",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react-native"
+  ],
+  "author": "Fetch Sky Technologies",
+  "license": "MIT",
+  "peerDependencies": {
+    "react-native": "^0.55.3"
+  }
+}
