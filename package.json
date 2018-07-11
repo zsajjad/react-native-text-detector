@@ -2,6 +2,7 @@
   "name": "react-native-text-detector",
   "version": "0.0.1",
   "description": "Text Detector from image for react native",
+  "summary": "Text Detector from image for react native using firebase ML Kit",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
