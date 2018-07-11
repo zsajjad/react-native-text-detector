@@ -30,8 +30,39 @@
     project(':react-native-text-detector').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-text-detector/android')
     ```
 3.  Insert the following lines inside the dependencies block in `android/app/build.gradle`:
+
     ```
-      compile project(':react-native-text-detector')
+    ...
+    dependencies {
+        implementation 'com.google.firebase:firebase-core:16.0.1'
+        implementation 'com.google.firebase:firebase-ml-vision:16.0.0'
+
+        implementation (project(':react-native-text-detector')) {
+            exclude group: 'com.google.firebase'
+        }
+    }
+
+    // Place this line at the end of file
+
+    apply plugin: 'com.google.gms.google-services'
+
+    // Work around for onesignal-gradle-plugin compatibility
+    com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
+    ```
+
+4.  Insert the following lines inside the dependencies block in `android/build.gradle`:
+
+    ```
+    buildscript {
+        repositories {
+            google()
+            ...
+        }
+        dependencies {
+            classpath 'com.android.tools.build:gradle:3.0.1'
+            classpath 'com.google.gms:google-services:4.0.1' // google-services plugin
+        }
+    }
     ```
 
 ## Usage

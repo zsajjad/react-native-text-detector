@@ -3,7 +3,6 @@ package com.fetchsky.RNTextDetector;
 
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -26,6 +25,9 @@ import java.io.IOException;
 public class RNTextDetectorModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
+  private final FirebaseVisionTextDetector detector = FirebaseVision.getInstance()
+        .getVisionTextDetector();
+  private FirebaseVisionImage image;
 
   public RNTextDetectorModule(ReactApplicationContext reactContext) {
     super(reactContext);
