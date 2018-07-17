@@ -15,10 +15,5 @@ Pod::Spec.new do |s|
 
 
   s.dependency     "React"
-#  s.dependency     'Firebase/Core'
-#  s.dependency     'FirebaseMLCommon', '~> 0.9.0'
-#  s.dependency     'FirebaseMLVision', '~> 0.9.0'
-#  s.dependency     'FirebaseMLVisionTextModel', '~> 0.9.0'
+  s.dependency     'TesseractOCRiOS', '~> 4.0.0'
 end
-
-  

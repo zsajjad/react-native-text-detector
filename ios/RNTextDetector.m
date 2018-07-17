@@ -3,11 +3,9 @@
 
 #import <React/RCTBridge.h>
 
-// #import <FirebaseCore/FirebaseCore.h>
-// #import <FirebaseMLVision/FIRVision.h>
-// #import <FirebaseMLVision/FIRVisionTextDetector.h>
-// #import <FirebaseMLVision/FIRVisionImage.h>
-// #import <FirebaseMLVision/FIRVisionText.h>
+#import <CoreML/CoreML.h>
+#import <Vision/Vision.h>
+#import <TesseractOCR/TesseractOCR.h>
 
 @implementation RNTextDetector
 
@@ -25,53 +23,63 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString *)imagePath resolver:(RC
         resolve(@NO);
         return;
     }
-    resolve(@YES);
-//     NSURL *imageURL = [NSURL URLWithString:imagePath];
-//     NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
-//     FIRVision *vision = [FIRVision vision];
-//     FIRVisionTextDetector *textDetector = [vision textDetector];
-//     FIRVisionImage *image = [[FIRVisionImage alloc] initWithImage:[UIImage imageWithData:imageData]];
 
-//     [textDetector detectInImage:image completion:^(NSArray<FIRVisionText *> * _Nullable features, NSError * _Nullable error) {
-//         if (!features || features.count == 0) {
-//             // [START_EXCLUDE]
-//             NSString *errorString = error
-//             ? error.localizedDescription
-//             : detectionNoResultsMessage;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        VNDetectTextRectanglesRequest *textReq = [VNDetectTextRectanglesRequest new];
+        NSDictionary *d = [[NSDictionary alloc] init];
+        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imagePath]];
         
-//             NSDictionary *pData = @{
-//                 @"error": [NSMutableString stringWithFormat:@"On-Device text detection failed with error: %@", errorString]
-//             };
-//             resolve(pData);
-//             // [END_EXCLUDE]
-//             return;
-//         }
+        VNImageRequestHandler *handler = [[VNImageRequestHandler alloc] initWithData:imageData options:d];
         
-//         if (error != nil) {
-//             RCTLog(@"Hello World Resolving NO");
-//             resolve(@NO);
-//             return;
-//         } else if (features != nil) {
-//             RCTLog(@"I am logging now!!");
-
-//             RCTLog(@"%@", features);
-//             NSMutableArray *output = [NSMutableArray array];
-//             for (id <FIRVisionText> feature in features) {
-//                 NSString *value = feature.text;
-//                 RCTLog(value);
-//                 NSDictionary *pData = @{
-//                 @"text": feature.text
-//                 };
-// //                     [pData setValue:feature.text forKey:@"text"];
-// //                     [pData setValue:feature.cornerPoints forKey:@"bounding"];
-//                 [output addObject:pData];
-//             }
-//             resolve(output);
-//         }
-//     }];
+        [handler performRequests:@[textReq] error:nil];
+        if (!textReq.results || textReq.results.count == 0) {
+            NSString *errorString = detectionNoResultsMessage;
+            NSDictionary *pData = @{
+                                    @"error": [NSMutableString stringWithFormat:@"On-Device text detection failed with error: %@", errorString]
+                                    };
+            // Running on background thread, don't call UIKit
+            dispatch_async(dispatch_get_main_queue(), ^{
+                resolve(pData);
+            });
+            return;
+        }
+        
+        
+        G8Tesseract *tesseract = [[G8Tesseract alloc] initWithLanguage:@"eng"];
+        tesseract.delegate = self;
+        UIImage *image = [UIImage imageWithData:imageData];
+        [tesseract setImage:image];
+        CGRect boundingBox;
+        CGSize size;
+        CGPoint origin;
+        NSMutableArray *output = [NSMutableArray array];
+        
+        for(VNTextObservation *observation in textReq.results){
+            if(observation){
+                NSMutableDictionary *block = [NSMutableDictionary dictionary];
+                NSMutableDictionary *bounding = [NSMutableDictionary dictionary];
+                
+                boundingBox = observation.boundingBox;
+                size = CGSizeMake(boundingBox.size.width * image.size.width, boundingBox.size.height * image.size.height);
+                origin = CGPointMake(boundingBox.origin.x * image.size.width, (1-boundingBox.origin.y)*image.size.height - size.height);
+                
+                tesseract.rect = CGRectMake(origin.x, origin.y, size.width, size.height);
+                [tesseract recognize];
+                
+                bounding[@"top"] = @(origin.y);
+                bounding[@"left"] = @(origin.x);
+                bounding[@"width"] = @(size.width);
+                bounding[@"height"] = @(size.height);
+                block[@"text"] = [tesseract.recognizedText stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+                block[@"bouding"] = bounding;
+                [output addObject:block];
+            }
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            resolve(output);
+        });
+    });
+    
 }
 
-
-
 @end
-  

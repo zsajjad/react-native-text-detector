@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="/Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/jniLibs"/></dataSet><dataSet config="release"><source path="/Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/release/jniLibs"/></dataSet></merger>

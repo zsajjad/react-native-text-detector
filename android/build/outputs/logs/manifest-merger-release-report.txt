@@ -1,0 +1,43 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+	package
+		ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:3:11-48
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+		ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+		ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:1-7:12
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:2:11-69
+meta-data#com.google.firebase.ml.vision.DEPENDENCIES
+ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:4:3-6:29
+	android:value
+		ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:6:7-26
+	android:name
+		ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml:5:7-64
+uses-sdk
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+		ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+		ADDED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
+		INJECTED from /Users/zainsajjad/Desktop/development/peekaboosdk_v2/node_modules/react-native-text-detector/android/src/main/AndroidManifest.xml
