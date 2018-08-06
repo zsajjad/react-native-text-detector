@@ -16,26 +16,35 @@
 }
 RCT_EXPORT_MODULE()
 
-static NSString *const detectionNoResultsMessage = @"No results returned.";
+static NSString *const detectionNoResultsMessage = @"Something went wrong";
 
 RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString *)imagePath resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     if (!imagePath) {
         resolve(@NO);
         return;
     }
-
+    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         VNDetectTextRectanglesRequest *textReq = [VNDetectTextRectanglesRequest new];
         NSDictionary *d = [[NSDictionary alloc] init];
-        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imagePath]];
+        NSData *imageData = [NSData dataWithContentsOfFile:imagePath];
+        UIImage *image = [UIImage imageWithData:imageData];
+
+        if (!image) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                resolve(@NO);
+            });
+            return;
+        }
         
         VNImageRequestHandler *handler = [[VNImageRequestHandler alloc] initWithData:imageData options:d];
-        
-        [handler performRequests:@[textReq] error:nil];
-        if (!textReq.results || textReq.results.count == 0) {
-            NSString *errorString = detectionNoResultsMessage;
+
+        NSError *error;
+        [handler performRequests:@[textReq] error:&error];
+        if (error || !textReq.results || textReq.results.count == 0) {
+            NSString *errorString = error ? error.localizedDescription : detectionNoResultsMessage;
             NSDictionary *pData = @{
-                                    @"error": [NSMutableString stringWithFormat:@"On-Device text detection failed with error: %@", errorString]
+                                    @"error": [NSMutableString stringWithFormat:@"On-Device text detection failed with error: %@", errorString],
                                     };
             // Running on background thread, don't call UIKit
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -47,7 +56,6 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString *)imagePath resolver:(RC
         
         G8Tesseract *tesseract = [[G8Tesseract alloc] initWithLanguage:@"eng"];
         tesseract.delegate = self;
-        UIImage *image = [UIImage imageWithData:imageData];
         [tesseract setImage:image];
         CGRect boundingBox;
         CGSize size;
