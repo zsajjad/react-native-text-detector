@@ -11,22 +11,20 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
-import com.google.firebase.ml.vision.text.FirebaseVisionTextDetector;
+import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
 import java.io.IOException;
 
 public class RNTextDetectorModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
-  private final FirebaseVisionTextDetector detector = FirebaseVision.getInstance()
-        .getVisionTextDetector();
+  private final FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
   private FirebaseVisionImage image;
 
   public RNTextDetectorModule(ReactApplicationContext reactContext) {
@@ -39,7 +37,7 @@ public class RNTextDetectorModule extends ReactContextBaseJavaModule {
         try {
             image = FirebaseVisionImage.fromFilePath(this.reactContext, android.net.Uri.parse(uri));
             Task<FirebaseVisionText> result =
-                    detector.detectInImage(image)
+                    detector.processImage(image)
                             .addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
                                 @Override
                                 public void onSuccess(FirebaseVisionText firebaseVisionText) {
@@ -71,7 +69,7 @@ public class RNTextDetectorModule extends ReactContextBaseJavaModule {
         WritableMap info = Arguments.createMap();
         WritableMap coordinates = Arguments.createMap();
 
-        for (FirebaseVisionText.Block block: firebaseVisionText.getBlocks()) {
+        for (FirebaseVisionText.TextBlock block: firebaseVisionText.getTextBlocks()) {
             info = Arguments.createMap();
             coordinates = Arguments.createMap();
 

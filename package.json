@@ -1,6 +1,6 @@
 {
   "name": "react-native-text-detector",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Text Detector from image for react native",
   "summary": "Text Detector from image for react native using firebase ML Kit",
   "homepage": "https://github.com/zsajjad/react-native-text-detector",
