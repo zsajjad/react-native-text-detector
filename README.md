@@ -55,7 +55,7 @@ Note how the tessdata folder has a blue icon, indicating it was imported as a re
     ...
     dependencies {
         implementation 'com.google.firebase:firebase-core:16.0.1'
-        implementation 'com.google.firebase:firebase-ml-vision:16.0.0'
+        implementation 'com.google.firebase:firebase-ml-vision:17.0.0'
 
         implementation (project(':react-native-text-detector')) {
             exclude group: 'com.google.firebase'
