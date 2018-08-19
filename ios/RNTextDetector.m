@@ -27,9 +27,9 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString *)imagePath resolver:(RC
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         VNDetectTextRectanglesRequest *textReq = [VNDetectTextRectanglesRequest new];
         NSDictionary *d = [[NSDictionary alloc] init];
-        NSData *imageData = [NSData dataWithContentsOfFile:imagePath];
+        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imagePath]];
         UIImage *image = [UIImage imageWithData:imageData];
-
+        
         if (!image) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 resolve(@NO);
@@ -38,7 +38,7 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString *)imagePath resolver:(RC
         }
         
         VNImageRequestHandler *handler = [[VNImageRequestHandler alloc] initWithData:imageData options:d];
-
+        
         NSError *error;
         [handler performRequests:@[textReq] error:&error];
         if (error || !textReq.results || textReq.results.count == 0) {
@@ -79,7 +79,7 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString *)imagePath resolver:(RC
                 bounding[@"width"] = @(size.width);
                 bounding[@"height"] = @(size.height);
                 block[@"text"] = [tesseract.recognizedText stringByReplacingOccurrencesOfString:@"\n" withString:@""];
-                block[@"bouding"] = bounding;
+                block[@"bounding"] = bounding;
                 [output addObject:block];
             }
         }
