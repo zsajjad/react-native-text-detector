@@ -24,12 +24,18 @@ import java.io.IOException;
 public class RNTextDetectorModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
-  private final FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
+  private FirebaseVisionTextRecognizer detector;
   private FirebaseVisionImage image;
 
   public RNTextDetectorModule(ReactApplicationContext reactContext) {
     super(reactContext);
     this.reactContext = reactContext;
+    try {
+        detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
+    }
+    catch (IllegalStateException e) {
+        e.printStackTrace();
+    }
   }
 
   @ReactMethod
