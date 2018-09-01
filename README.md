@@ -103,6 +103,7 @@ export class TextDetectionComponent extends PureComponent {
           pageSegmentation: "SparseTextOSD" // optional
           charWhitelist: "01234567" // optional
           charBlacklist: "01234567" // optional
+          imageTransformationMode: 2, // optional | 0 => none | 1 => g8_grayScale | 2 => g8_blackAndWhite
       });
       console.log('visionResp', visionResp);
     } catch (e) {
