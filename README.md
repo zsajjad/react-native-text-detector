@@ -1,5 +1,8 @@
 # react-native-text-detector
 
+## See it in action
+Checkout this blog for [HeartBeat by Fritz.ai](https://heartbeat.fritz.ai/building-text-detection-apps-for-ios-and-android-using-react-native-42fe3c7e339) for example of this package.
+
 ## Getting started
 
 `$ npm install react-native-text-detector --save` or `yarn add react-native-text-detector`
