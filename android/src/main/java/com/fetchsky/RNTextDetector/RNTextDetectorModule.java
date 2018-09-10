@@ -1,8 +1,10 @@
 
 package com.fetchsky.RNTextDetector;
 
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -20,6 +22,7 @@ import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class RNTextDetectorModule extends ReactContextBaseJavaModule {
 
@@ -39,9 +42,36 @@ public class RNTextDetectorModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-    public void detectFromUri(String uri, final Promise promise) {
+    public void detectFromFile(String uri, final Promise promise) {
         try {
             image = FirebaseVisionImage.fromFilePath(this.reactContext, android.net.Uri.parse(uri));
+            Task<FirebaseVisionText> result =
+                    detector.processImage(image)
+                            .addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
+                                @Override
+                                public void onSuccess(FirebaseVisionText firebaseVisionText) {
+                                    promise.resolve(getDataAsArray(firebaseVisionText));
+                                }
+                            })
+                            .addOnFailureListener(
+                                    new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            e.printStackTrace();
+                                            promise.reject(e);
+                                        }
+                                    });;
+        } catch (IOException e) {
+            promise.reject(e);
+            e.printStackTrace();
+        }
+    }
+
+    @ReactMethod
+    public void detectFromUri(String uri, final Promise promise) {
+        try {
+            URL url = new URL(uri);
+            image = FirebaseVisionImage.fromBitmap(BitmapFactory.decodeStream(url.openConnection().getInputStream()));
             Task<FirebaseVisionText> result =
                     detector.processImage(image)
                             .addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
@@ -72,22 +102,54 @@ public class RNTextDetectorModule extends ReactContextBaseJavaModule {
      */
     private WritableArray getDataAsArray(FirebaseVisionText firebaseVisionText) {
         WritableArray data = Arguments.createArray();
-        WritableMap info = Arguments.createMap();
-        WritableMap coordinates = Arguments.createMap();
 
         for (FirebaseVisionText.TextBlock block: firebaseVisionText.getTextBlocks()) {
-            info = Arguments.createMap();
-            coordinates = Arguments.createMap();
+            WritableArray blockElements = Arguments.createArray();
 
-            Rect boundingBox = block.getBoundingBox();
+            for (FirebaseVisionText.Line line: block.getLines()) {
+                WritableArray lineElements = Arguments.createArray();
+                for (FirebaseVisionText.Element element: line.getElements()) {
+                    WritableMap e = Arguments.createMap();
 
-            coordinates.putInt("top", boundingBox.top);
-            coordinates.putInt("left", boundingBox.left);
-            coordinates.putInt("width", boundingBox.width());
-            coordinates.putInt("height", boundingBox.height());
+                    WritableMap eCoordinates = Arguments.createMap();
+                    eCoordinates.putInt("top", element.getBoundingBox().top);
+                    eCoordinates.putInt("left", element.getBoundingBox().left);
+                    eCoordinates.putInt("width", element.getBoundingBox().width());
+                    eCoordinates.putInt("height", element.getBoundingBox().height());
+
+                    e.putString("text", element.getText());
+//                    e.putDouble("confidence", element.getConfidence());
+                    e.putMap("bounding", eCoordinates);
+                    lineElements.pushMap(e);
+                }
+
+                WritableMap l = Arguments.createMap();
+
+                WritableMap lCoordinates = Arguments.createMap();
+                lCoordinates.putInt("top", line.getBoundingBox().top);
+                lCoordinates.putInt("left", line.getBoundingBox().left);
+                lCoordinates.putInt("width", line.getBoundingBox().width());
+                lCoordinates.putInt("height", line.getBoundingBox().height());
+
+                l.putString("text", line.getText());
+//                l.putDouble("confidence", line.getConfidence());
+                l.putMap("bounding", lCoordinates);
+                l.putArray("elements", lineElements);
+
+                blockElements.pushMap(l);
+            }
+            WritableMap info = Arguments.createMap();
+            WritableMap coordinates = Arguments.createMap();
+
+            coordinates.putInt("top", block.getBoundingBox().top);
+            coordinates.putInt("left", block.getBoundingBox().left);
+            coordinates.putInt("width", block.getBoundingBox().width());
+            coordinates.putInt("height", block.getBoundingBox().height());
 
             info.putMap("bounding", coordinates);
             info.putString("text", block.getText());
+            info.putArray("lines", blockElements);
+//            info.putDouble("confidence", block.getConfidence());
             data.pushMap(info);
         }
 
