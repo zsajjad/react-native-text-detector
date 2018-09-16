@@ -1,6 +1,8 @@
 # React Native Text Detector
 
-[![npm](https://img.shields.io/npm/dm/react-native-text-detector.svg)](https://www.npmjs.com/package/react-native-text-detector)
+[![npm](https://img.shields.io/npm/dm/react-native-text-detector.svg)](https://www.npmjs.com/package/react-native-text-detector) 
+![GitHub release](https://img.shields.io/github/release/qubyte/rubidium.svg)
+
 
 
 ## See it in action
