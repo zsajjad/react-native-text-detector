@@ -1,4 +1,4 @@
-# react-native-text-detector
+# React Native Text Detector
 
 [![npm](https://img.shields.io/npm/dm/react-native-text-detector.svg)](https://www.npmjs.com/package/react-native-text-detector)
 
