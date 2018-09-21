@@ -1,8 +1,11 @@
 
 package com.fetchsky.RNTextDetector;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 
@@ -56,15 +59,16 @@ public class RNTextDetectorModule extends ReactContextBaseJavaModule {
     }
 
     private int getPageSegmentationMode(String value) {
-            return TessBaseAPI.PageSegMode.PSM_AUTO_OSD;
+        return TessBaseAPI.PageSegMode.PSM_AUTO_OSD;
     }
 
+    @SuppressLint("StaticFieldLeak")
     @ReactMethod
-    public void detect(ReadableMap options, final Promise promise) {
+    public void detect(final ReadableMap options, final Promise promise) {
         try {
             prepareTesseract();
             BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-            Bitmap bitmap;
+            final Bitmap bitmap;
 
             if (options.getString(PATH_KEY).contains("http")) {
                 bitmap = RNTextDetectorUtils.getBitmapFromURL(options.getString(PATH_KEY));
@@ -72,54 +76,67 @@ public class RNTextDetectorModule extends ReactContextBaseJavaModule {
                 bitmap = BitmapFactory.decodeFile(options.getString(PATH_KEY), bitmapOptions);
             }
 
-            promise.resolve(extractText(options, bitmap));
+            new AsyncTask<Void, Void, WritableArray>() {
+                protected WritableArray doInBackground(Void... params) {
+                    tessBaseApi = new TessBaseAPI();
+                    tessBaseApi.init(DATA_PATH, options.getString(LANGUAGE_KEY));
+
+                    if (options.hasKey(SEGMENTATION_KEY)) {
+                        tessBaseApi.setPageSegMode(getPageSegmentationMode(options.getString(SEGMENTATION_KEY)));
+
+                    }
+
+                    //Whitelist - List of characters you want to detect
+                    if (options.hasKey(WHITELIST_KEY) &&
+                            options.getString(WHITELIST_KEY) != null
+                            && !options.getString(WHITELIST_KEY).isEmpty()) {
+                        tessBaseApi.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, options.getString(WHITELIST_KEY));
+                    }
+
+                    if (options.hasKey(BLACKLIST_KEY) &&
+                            options.getString(BLACKLIST_KEY) != null
+                            && !options.getString(BLACKLIST_KEY).isEmpty()) {
+                        tessBaseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, options.getString(BLACKLIST_KEY));
+                    }
+
+                    tessBaseApi.setImage(bitmap);
+
+                    WritableArray output = Arguments.createArray();
+                    WritableMap tempMap;
+                    WritableMap bounding;
+
+                    String extractedText = tessBaseApi.getUTF8Text();
+                    int iteratorLevel = getIteratorLevel(options.getString(ITERATOR_KEY));
+                    final ResultIterator iterator = tessBaseApi.getResultIterator();
+                    iterator.begin();
+                    do {
+                        tempMap = Arguments.createMap();
+                        bounding = Arguments.createMap();
+
+                        Rect rect = iterator.getBoundingRect(iteratorLevel);
+                        bounding.putInt("top", rect.top);
+                        bounding.putInt("left", rect.left);
+                        bounding.putInt("width", rect.width());
+                        bounding.putInt("height", rect.height());
+
+                        tempMap.putString("text", iterator.getUTF8Text(iteratorLevel));
+                        tempMap.putDouble("confidence", iterator.confidence(iteratorLevel));
+                        tempMap.putMap("bounding", bounding);
+                        output.pushMap(tempMap);
+                    } while (iterator.next(iteratorLevel));
+                    iterator.delete();
+
+                    tessBaseApi.end();
+                    return output;
+                }
+                protected void onPostExecute(WritableArray result) {
+                    promise.resolve(result);
+                }
+            }.execute();
         } catch (Exception e) {
             promise.reject(e);
             e.printStackTrace();
         }
-    }
-
-    private WritableArray extractText(final ReadableMap options, Bitmap bitmap) {
-        tessBaseApi = new TessBaseAPI();
-        tessBaseApi.init(DATA_PATH, options.getString(LANGUAGE_KEY));
-
-        if (options.hasKey(SEGMENTATION_KEY)) {
-            tessBaseApi.setPageSegMode(getPageSegmentationMode(options.getString(SEGMENTATION_KEY)));
-
-        }
-
-        //Whitelist - List of characters you want to detect
-        if (options.hasKey(WHITELIST_KEY) &&
-                options.getString(WHITELIST_KEY) != null
-                && !options.getString(WHITELIST_KEY).isEmpty()) {
-            tessBaseApi.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, options.getString(WHITELIST_KEY));
-        }
-
-        if (options.hasKey(BLACKLIST_KEY) &&
-                options.getString(BLACKLIST_KEY) != null
-                && !options.getString(BLACKLIST_KEY).isEmpty()) {
-            tessBaseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, options.getString(BLACKLIST_KEY));
-        }
-
-        tessBaseApi.setImage(bitmap);
-
-        WritableArray output = Arguments.createArray();
-        WritableMap temp;
-
-        int iteratorLevel = getIteratorLevel(options.getString(ITERATOR_KEY));
-        final ResultIterator iterator = tessBaseApi.getResultIterator();
-        iterator.begin();
-        do {
-            temp = Arguments.createMap();
-            temp.putString("text", iterator.getUTF8Text(iteratorLevel));
-            temp.putDouble("confidence", iterator.confidence(iteratorLevel));
-            output.pushMap(temp);
-        } while (iterator.next(iteratorLevel));
-        iterator.delete();
-
-        tessBaseApi.end();
-
-        return output;
     }
 
     private void prepareDirectory(String path) {
