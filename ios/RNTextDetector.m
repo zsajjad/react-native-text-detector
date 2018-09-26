@@ -35,6 +35,17 @@ G8PageIteratorLevel getPageIteratorLevel(NSString *value) {
     return G8PageIteratorLevelTextline;
 }
 
+UIImage* preprocessedImageForTesseract(UIImage *sourceImage, int option) {
+    switch (option) {
+        case 1:
+            return [sourceImage g8_grayScale];
+        case 2:
+            return [sourceImage g8_blackAndWhite];
+        default:
+            return sourceImage;
+    }
+}
+
 RCT_REMAP_METHOD(detect, detect:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     if (![options valueForKey:path]) {
         resolve(@NO);
@@ -61,7 +72,8 @@ RCT_REMAP_METHOD(detect, detect:(NSDictionary *)options resolver:(RCTPromiseReso
         @try {
             G8Tesseract *tesseract = [[G8Tesseract alloc] initWithLanguage:[options valueForKey:language]];
             tesseract.delegate = self;
-            [tesseract setImage:image];
+            [tesseract setImage:preprocessedImageForTesseract(image, [options valueForKey:@"imageTransformationMode"] || 0)];
+            
             [tesseract recognize];
             if ([options valueForKey:segementation]) {
                 [tesseract setPageSegmentationMode:getPageSegmentationMode([options valueForKey:segementation])];
@@ -71,7 +83,7 @@ RCT_REMAP_METHOD(detect, detect:(NSDictionary *)options resolver:(RCTPromiseReso
             NSArray *elements = [tesseract recognizedBlocksByIteratorLevel:getPageIteratorLevel([options valueForKey:iterator])];
             for (G8RecognizedBlock *e in elements) {
                 [output addObject:@{
-                                    @"text": e.text,
+                                    @"text": [e.text stringByReplacingOccurrencesOfString:@"\n" withString:@""],
                                     @"bounding": rectToDictionary(getScaledBoundingFromImage(e.boundingBox, image)),
                                     @"confidence": @(e.confidence)
                                     }];
