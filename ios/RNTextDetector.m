@@ -1,11 +1,16 @@
+#include <time.h>
 
 #import "RNTextDetector.h"
 
 #import <React/RCTBridge.h>
+#import <React/RCTLog.h>
 
-#import <CoreML/CoreML.h>
-#import <Vision/Vision.h>
 #import <TesseractOCR/TesseractOCR.h>
+
+#import <FirebaseCore/FirebaseCore.h>
+#import <FirebaseMLVision/FirebaseMLVision.h>
+
+#import "RNTextDetectorUtils.h"
 
 @implementation RNTextDetector
 
@@ -16,18 +21,49 @@
 }
 RCT_EXPORT_MODULE()
 
-static NSString *const detectionNoResultsMessage = @"Something went wrong";
+static NSString *detectionNoResultsMessage = @"Something went wrong";
 
-RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString *)imagePath resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    if (!imagePath) {
+static NSString *language = @"language";
+static NSString *path = @"imagePath";
+static NSString *iterator = @"pageIteratorLevel";
+static NSString *segementation = @"pageSegmentation";
+static NSString *imageTransformation = @"imageTransformation";
+
+G8PageSegmentationMode getPageSegmentationMode(NSString *value) {
+    // TODO: return based on value coming from JS Thread.
+    return G8PageSegmentationModeSparseTextOSD;
+}
+
+G8PageIteratorLevel getPageIteratorLevel(NSString *value) {
+    // TODO: return based on value coming from JS Thread.
+    return G8PageIteratorLevelTextline;
+}
+
+UIImage* preprocessedImageForTesseract(UIImage *sourceImage, int option) {
+    switch (option) {
+        case 1:
+            return [sourceImage g8_grayScale];
+        case 2:
+            return [sourceImage g8_blackAndWhite];
+        default:
+            return sourceImage;
+    }
+}
+
+RCT_REMAP_METHOD(tesseract, tesseract:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    if (![options valueForKey:path]) {
         resolve(@NO);
         return;
     }
+    NSString *imagePath = [options valueForKey:path];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        VNDetectTextRectanglesRequest *textReq = [VNDetectTextRectanglesRequest new];
-        NSDictionary *d = [[NSDictionary alloc] init];
-        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imagePath]];
+        NSData *imageData;
+        if ([imagePath rangeOfString:@"http"].location == NSNotFound) {
+            imageData = [NSData dataWithContentsOfFile:imagePath];
+        } else {
+            imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imagePath]];
+        }
         UIImage *image = [UIImage imageWithData:imageData];
         
         if (!image) {
@@ -36,56 +72,93 @@ RCT_REMAP_METHOD(detectFromUri, detectFromUri:(NSString *)imagePath resolver:(RC
             });
             return;
         }
-        
-        VNImageRequestHandler *handler = [[VNImageRequestHandler alloc] initWithData:imageData options:d];
-        
-        NSError *error;
-        [handler performRequests:@[textReq] error:&error];
-        if (error || !textReq.results || textReq.results.count == 0) {
-            NSString *errorString = error ? error.localizedDescription : detectionNoResultsMessage;
-            NSDictionary *pData = @{
-                                    @"error": [NSMutableString stringWithFormat:@"On-Device text detection failed with error: %@", errorString],
-                                    };
-            // Running on background thread, don't call UIKit
+        clock_t start, end;
+        @try {
+            G8Tesseract *tesseract = [[G8Tesseract alloc] initWithLanguage:[options valueForKey:language]];
+            tesseract.delegate = self;
+            start = clock();
+            [tesseract setImage:preprocessedImageForTesseract(image, [options valueForKey:imageTransformation] || 0)];
+            [tesseract recognize];
+            [tesseract setMaximumRecognitionTime:100];
+            end = clock();
+            if ([options valueForKey:segementation]) {
+                [tesseract setPageSegmentationMode:getPageSegmentationMode([options valueForKey:segementation])];
+            }
+            
+            NSMutableArray *output = [NSMutableArray array];
+            NSArray *elements = [tesseract recognizedBlocksByIteratorLevel:getPageIteratorLevel([options valueForKey:iterator])];
+            for (G8RecognizedBlock *e in elements) {
+                [output addObject:@{
+                                    @"text": [e.text stringByReplacingOccurrencesOfString:@"\n" withString:@""],
+                                    @"bounding": rectToDictionary(getScaledBoundingFromImage(e.boundingBox, image)),
+                                    @"confidence": @(e.confidence),
+                                    @"timeConsumed": @((double)(end - start) / CLOCKS_PER_SEC),
+                                    }];
+            }
             dispatch_async(dispatch_get_main_queue(), ^{
-                resolve(pData);
+                resolve(output);
+            });
+        }
+        @catch (NSException *e) {
+            NSString *errorString = e ? e.reason : detectionNoResultsMessage;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                resolve(@{
+                          @"error": [NSMutableString stringWithFormat:@"On-Device text detection failed with error: %@", errorString],
+                          });
+            });
+        }
+    });
+    
+}
+
+RCT_REMAP_METHOD(firebase, firebase:(NSDictionary *)options resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    if (![options valueForKey:path]) {
+        resolve(@NO);
+        return;
+    }
+    NSString *imagePath = [options valueForKey:path];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imagePath]];
+        UIImage *image = [UIImage imageWithData:imageData];
+        
+        if (!image) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                RCTLog(@"No image found %@", imagePath);
+                resolve(@NO);
             });
             return;
         }
         
-        
-        G8Tesseract *tesseract = [[G8Tesseract alloc] initWithLanguage:@"eng"];
-        tesseract.delegate = self;
-        [tesseract setImage:image];
-        CGRect boundingBox;
-        CGSize size;
-        CGPoint origin;
-        NSMutableArray *output = [NSMutableArray array];
-        
-        for(VNTextObservation *observation in textReq.results){
-            if(observation){
-                NSMutableDictionary *block = [NSMutableDictionary dictionary];
-                NSMutableDictionary *bounding = [NSMutableDictionary dictionary];
-                
-                boundingBox = observation.boundingBox;
-                size = CGSizeMake(boundingBox.size.width * image.size.width, boundingBox.size.height * image.size.height);
-                origin = CGPointMake(boundingBox.origin.x * image.size.width, (1-boundingBox.origin.y)*image.size.height - size.height);
-                
-                tesseract.rect = CGRectMake(origin.x, origin.y, size.width, size.height);
-                [tesseract recognize];
-                
-                bounding[@"top"] = @(origin.y);
-                bounding[@"left"] = @(origin.x);
-                bounding[@"width"] = @(size.width);
-                bounding[@"height"] = @(size.height);
-                block[@"text"] = [tesseract.recognizedText stringByReplacingOccurrencesOfString:@"\n" withString:@""];
-                block[@"bounding"] = bounding;
-                [output addObject:block];
+        FIRVision *vision = [FIRVision vision];
+        FIRVisionTextRecognizer *textRecognizer = [vision onDeviceTextRecognizer];
+        FIRVisionImage *handler = [[FIRVisionImage alloc] initWithImage:image];
+        clock_t start = clock();
+        [textRecognizer processImage:handler completion:^(FIRVisionText *_Nullable result, NSError *_Nullable error) {
+            @try {
+                if (error != nil || result == nil) {
+                    NSString *errorString = error ? error.localizedDescription : detectionNoResultsMessage;
+                    @throw [NSException exceptionWithName:@"failure" reason:errorString userInfo:nil];
+                    return;
+                }
+                clock_t end = clock();
+                NSMutableArray *output = prepareFirebaseOutput(result, (double)(end - start) / CLOCKS_PER_SEC);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    resolve(output);
+                });
             }
-        }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            resolve(output);
-        });
+            @catch (NSException *e) {
+                NSString *errorString = e ? e.reason : detectionNoResultsMessage;
+                NSDictionary *pData = @{
+                                        @"error": [NSMutableString stringWithFormat:@"On-Device text detection failed with error: %@", errorString],
+                                        };
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    resolve(pData);
+                });
+            }
+            
+        }];
+        
     });
     
 }

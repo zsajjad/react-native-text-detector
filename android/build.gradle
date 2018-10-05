@@ -13,7 +13,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "27.0.3"
 
     defaultConfig {
         minSdkVersion 16
@@ -31,8 +31,9 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.facebook.react:react-native:+'
+    implementation 'com.rmtheis:tess-two:+'
     implementation 'com.google.firebase:firebase-core:+'
     implementation 'com.google.firebase:firebase-ml-vision:+'
-    implementation 'com.facebook.react:react-native:+'
 }
   
