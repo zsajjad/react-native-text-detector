@@ -7,6 +7,9 @@
 ## See it in action
 Checkout this blog for [HeartBeat by Fritz.ai](https://heartbeat.fritz.ai/building-text-detection-apps-for-ios-and-android-using-react-native-42fe3c7e339) for example of this package.
 
+## Used in DeltaML
+We are developing DeltaML for mobile machine learning developers it uses this package. Enjoy [some of our findings here](https://heartbeat.fritz.ai/comparing-on-device-text-recognition-ocr-sdks-24f8a0423461).
+
 ## Getting started
 
 `$ npm install react-native-text-detector --save` or `yarn add react-native-text-detector`
