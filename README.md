@@ -3,12 +3,20 @@
 [![npm](https://img.shields.io/npm/dm/react-native-text-detector.svg)](https://www.npmjs.com/package/react-native-text-detector)
 
 
-
 ## See it in action
-Checkout this blog for [HeartBeat by Fritz.ai](https://heartbeat.fritz.ai/building-text-detection-apps-for-ios-and-android-using-react-native-42fe3c7e339) for example of this package.
+Checkout these blog for 
+- [Business Card Reading App](https://heartbeat.fritz.ai/building-text-detection-apps-for-ios-and-android-using-react-native-42fe3c7e339) 
+- [Delta ML - Comparison between different OCR SDKs](https://heartbeat.fritz.ai/comparing-on-device-text-recognition-ocr-sdks-24f8a0423461)
 
-## Used in DeltaML
-We are developing DeltaML for mobile machine learning developers it uses this package. Enjoy [some of our findings here](https://heartbeat.fritz.ai/comparing-on-device-text-recognition-ocr-sdks-24f8a0423461).
+for example of this package.
+
+## Different libraries
+Default branch uses Tesseract on iOS and Firebase ML Kit on android. Beside that we have 2 branches
+
+- [Firebase](https://github.com/zsajjad/react-native-text-detector/tree/firebase) it uses firebase on both platforms
+- [Tesseract OCR](https://github.com/zsajjad/react-native-text-detector/tree/tesseract) it uses tesseract on both platforms
+
+For deciding between which one is better check this blog on [Hearbeat by Fritz.ai](https://heartbeat.fritz.ai/comparing-on-device-text-recognition-ocr-sdks-24f8a0423461)
 
 ## Getting started
 
