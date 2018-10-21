@@ -8,17 +8,7 @@
 
 #### iOS
 
-##### Attach Tesseract Languages you want to use in your app 
-
-Import your tessdata folder (you can download one for your language from [Google's Repo](https://code.google.com/p/tesseract-ocr/downloads/list) OR if that gives an error use [THIS REPO](https://github.com/tesseract-ocr/tessdata/tree/bf82613055ebc6e63d9e3b438a5c234bfd638c93) as referenced on [stack overflow as solution](https://stackoverflow.com/questions/41131083/tesseract-traineddata-not-working-in-swift-3-0-project-using-version-4-0/41168236#41168236) into the root of your project AS A REFERENCED FOLDER (see below). It contains the Tesseract trained data files. You can add your own trained data files here too.
-
-NOTE: This library currently requires the tessdata folder to be linked as a referenced folder instead of a symbolic group. If Tesseract can't find a language file in your own project, it's probably because you created the tessdata folder as a symbolic group instead of a referenced folder. It should look like this if you did it correctly:
-
-![alt text](https://cloud.githubusercontent.com/assets/817753/4598582/aeba675c-50ba-11e4-8d14-c7af9336b965.png "guide")
-
-Note how the tessdata folder has a blue icon, indicating it was imported as a referenced folder instead of a symbolic group.
-
-##### Also add `-lstdc++` if not already present
+Please create project on firebase console, Download a GoogleService-Info.plist file from [Firebase console](https://console.firebase.google.com/?pli=1) and include it in your app.
 
 ##### Using Pods (Recommended)
 1. Add following in `ios/Podfile` 
@@ -39,7 +29,7 @@ Note how the tessdata folder has a blue icon, indicating it was imported as a re
 
 #### Android
 
-1.  Open up `android/app/src/main/java/[...]/MainActivity.java`
+1.  Open up `android/app/src/main/java/[...]/MainApplication.java`
 
 - Add `import com.fetchsky.RNTextDetector.RNTextDetectorPackage;` to the imports at the top of the file
 - Add `new RNTextDetectorPackage()` to the list returned by the `getPackages()` method
