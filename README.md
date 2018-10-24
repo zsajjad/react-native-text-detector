@@ -6,7 +6,8 @@
 ## See it in action
 Checkout these blog for 
 - [Business Card Reading App](https://heartbeat.fritz.ai/building-text-detection-apps-for-ios-and-android-using-react-native-42fe3c7e339) 
-- [Delta ML - Comparison between different OCR SDKs](https://heartbeat.fritz.ai/comparing-on-device-text-recognition-ocr-sdks-24f8a0423461)
+- [Delta ML - Comparison between different OCR SDKs (iOS)](https://heartbeat.fritz.ai/comparing-on-device-text-recognition-ocr-sdks-24f8a0423461)
+- [Choose the Right On-Device Text Recognition (OCR) SDK on Android Using DeltaML](https://heartbeat.fritz.ai/https-heartbeat-fritz-ai-choose-the-right-on-device-text-recognition-sdk-on-android-using-deltaml-9b4b3e409b6e)
 
 for example of this package.
 
