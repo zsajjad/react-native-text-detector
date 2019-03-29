@@ -60,7 +60,7 @@ Note how the tessdata folder has a blue icon, indicating it was imported as a re
 
 This package uses Firebase ML Kit for text recognition on android please make sure you have integrated firebase in your app before started integration of this package. [Here is the guide](https://firebase.google.com/docs/android/setup) for Firebase integration.
 
-1.  Open up `android/app/src/main/java/[...]/MainActivity.java`
+1.  Open up `android/app/src/main/java/[...]/MainApplication.java`
 
 - Add `import com.fetchsky.RNTextDetector.RNTextDetectorPackage;` to the imports at the top of the file
 - Add `new RNTextDetectorPackage()` to the list returned by the `getPackages()` method
