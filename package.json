@@ -5,6 +5,7 @@
   "summary": "Text Detector from image for react native using firebase ML Kit",
   "homepage": "https://github.com/zsajjad/react-native-text-detector",
   "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
